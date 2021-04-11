@@ -9,7 +9,6 @@ import { sortBy, includes, isEmpty } from 'lodash';
 import { createSelector } from 'reselect';
 import { persistReducer } from 'redux-persist';
 import localStorage from 'redux-persist/lib/storage';
-import sessionStorage from 'redux-persist/lib/storage/session';
 
 /* ------------- Types and Action Creators ------------- */
 
