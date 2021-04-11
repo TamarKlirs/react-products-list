@@ -16,7 +16,6 @@ class App extends React.Component<Props> {
 	render() {
 		const { children, pendingTasks } = this.props;
 		const loading = pendingTasks?.length;
-
 		return (
 			<>
 				<ErrorHandler />

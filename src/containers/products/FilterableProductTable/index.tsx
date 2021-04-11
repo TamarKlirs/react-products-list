@@ -22,6 +22,7 @@ interface OwnProps {
 	getProductsList: () => void;
 	filter: ProductFilter;
 	setFilter: (filter: ProductFilter) => void;
+	deleteProduct: (productId: string) => void;
 }
 
 interface State {
@@ -38,8 +39,10 @@ class FilterableProductTable extends React.PureComponent<Props & OwnProps, State
 
 		this.handleProductSelected = this.handleProductSelected.bind(this);
 		this.handleFilterTextChange = this.handleFilterTextChange.bind(this);
+		this.handleFilterIdTextChange = this.handleFilterIdTextChange.bind(this);
 		this.handleProductSelected = this.handleProductSelected.bind(this);
 		this.handleInStockChange = this.handleInStockChange.bind(this);
+		this.handleDeleteProduct = this.handleDeleteProduct.bind(this);
 	}
 
 	componentDidMount() {
@@ -52,28 +55,41 @@ class FilterableProductTable extends React.PureComponent<Props & OwnProps, State
 	handleProductSelected(selectedProduct: Product) {
 		this.setState({ selectedProduct });
 	}
+	
+	handleDeleteProduct(ProductId: string) {
+		const { deleteProduct } = this.props;
+		deleteProduct(ProductId);
+	}
 
 	handleFilterTextChange(filterText: string) {
 		const { setFilter, filter } = this.props;
 		setFilter({ ...filter, filterText });
 	}
 
+	
 	handleInStockChange(inStockOnly: boolean) {
 		const { setFilter, filter } = this.props;
 		setFilter({ ...filter, inStockOnly });
 	}
 
+	handleFilterIdTextChange(filterById: string) {
+		const { setFilter, filter } = this.props;
+		setFilter({ ...filter, filterById });
+	}
+	
 	render() {
-		const { filter: { filterText, inStockOnly }, products, translate } = this.props;
+		const { filter: { filterText, inStockOnly, filterById }, products, translate } = this.props;
 		const { selectedProduct } = this.state;
 
 		return (
 			<Container fluid>
 				<Row>
 					<ProductSearchBar
-						filterText={filterText}
+					    filterText={filterText}
 						inStockOnly={inStockOnly}
+						filterById ={filterById}
 						onFilterTextChange={this.handleFilterTextChange}
+						onFilterIdTextChange={this.handleFilterIdTextChange}
 						onInStockChange={this.handleInStockChange}
 					/>
 				</Row>
@@ -87,7 +103,10 @@ class FilterableProductTable extends React.PureComponent<Props & OwnProps, State
 						/>
 					</Col>
 					<Col lg={4}>
-						{selectedProduct != null && <ProductView translate={translate} product={selectedProduct} />}
+						{selectedProduct != null && 
+						<ProductView translate={translate} product={selectedProduct} 
+					     	onDeleteProduct={this.handleDeleteProduct}
+						/>}
 					</Col>
 				</Row>
 			</Container>
@@ -104,5 +123,6 @@ export default baseConnect(FilterableProductTable,
 	},
 	(dispatch: Dispatch) => ({
 		getProductsList: () => dispatch(ProductActions.getProducts()),
-		setFilter: (filter: ProductFilter) => dispatch(ProductActions.setFilter(filter))
+		setFilter: (filter: ProductFilter) => dispatch(ProductActions.setFilter(filter)),
+		deleteProduct: (productId: string) => dispatch(ProductActions.deleteProductFromServer(productId))
 	}));

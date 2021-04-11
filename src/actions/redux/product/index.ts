@@ -2,7 +2,7 @@ import Immutable, { ImmutableObject, from } from 'seamless-immutable';
 import { createReducer, createActions } from 'reduxsauce';
 import { ApplicationState } from '../index';
 import {
-	ProductState, TypesNames, ActionCreator, SetProductsAction, SetFilterProductAction, SetProductAction, Product
+	ProductState, TypesNames, ActionCreator, SetProductsAction, SetFilterProductAction,DeleteProductAction, SetProductAction, Product
 } from './interfaces';
 import { AnyAction } from 'redux';
 import { sortBy, includes, isEmpty } from 'lodash';
@@ -19,6 +19,8 @@ const { Creators } = createActions<TypesNames, ActionCreator>({
 	setFilter: ['filter'],
 	createProduct: ['product'],
 	updateProduct: ['product'],
+	deleteProduct: ['productId'],
+	deleteProductFromServer: ['productId'],
 	setProduct: ['product'],
 	loadProduct: [],
 });
@@ -32,7 +34,8 @@ const INITIAL_STATE = Immutable<ProductState>({
 	products: [],
 	filter: {
 		inStockOnly: true,
-		filterText: ''
+		filterText: '',
+		filterById: ''
 	},
 	loading: false,
 	success: false,
@@ -44,11 +47,13 @@ const getProducts = (state: ApplicationState) => state.product.products;
 const getFilter = (state: ApplicationState) => state.product.filter;
 const getIsInStock = (state: ApplicationState) => state.product.filter.inStockOnly;
 const getFilterText = (state: ApplicationState) => state.product.filter.filterText;
+const getFilterById = (state: ApplicationState) => state.product.filter.filterById;
 
-const getProductsList = (products: Product[], inStockOnly: boolean, filterText: string) => {
+const getProductsList = (products: Product[], inStockOnly: boolean, filterText: string, filterById: string) => {
 	return products.filter((product: Product) => {
 		if (!isProductContainsText(product, filterText)) return false;
 		if (inStockOnly && !product.isInStock) return false;
+		if (filterById && product.id != filterById) return false;
 		return true;
 	});
 };
@@ -61,7 +66,7 @@ const isProductContainsText = (product: Product, search: string) => {
 };
 
 const getProductsSelector = createSelector(
-	[getProducts, getIsInStock, getFilterText],
+	[getProducts, getIsInStock, getFilterText, getFilterById],
 	getProductsList
 );
 
@@ -98,6 +103,15 @@ const setProductReducer = (state: ProductState, action: SetProductAction) => {
 	});
 };
 
+const deleteProductReducer=(state: ProductState, action: DeleteProductAction) => {
+    const { productId } = action;
+	const newProducts = state.products.filter((p:Product) => p.id !== productId);
+	return from(state).merge({
+		products:newProducts, loading: false, success: true, error: false
+	});
+
+}
+
 const setErrorReducer = (state: ProductState) => {
 	return from(state).merge({ loading: false, success: false, error: true });
 };
@@ -113,6 +127,7 @@ const productReducer = createReducer<any, AnyAction>(INITIAL_STATE, {
 	[ProductTypes.SET_PRODUCT]: setProductReducer,
 	[ProductTypes.PRODUCT_ERROR]: setErrorReducer,
 	[ProductTypes.LOAD_PRODUCT]: setLoadReducer,
+	[ProductTypes.DELETE_PRODUCT]: deleteProductReducer,
 });
 
 const persistConfig = {

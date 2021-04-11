@@ -17,6 +17,8 @@ export enum TypesNames {
 	SET_PRODUCT = 'SET_PRODUCT',
 	PRODUCT_ERROR = 'PRODUCT_ERROR',
 	LOAD_PRODUCT = 'LOAD_PRODUCT',
+	DELETE_PRODUCT = 'DELETE_PRODUCT',
+	DELETE_PRODUCT_FROM_SERVER = 'DELETE_PRODUCT_FROM_SERVER'
 }
 
 export interface ActionCreator {
@@ -25,6 +27,8 @@ export interface ActionCreator {
 	setFilter: (filter: ProductFilter) => SetFilterProductAction;
 	createProduct: (product: Product) => CreateProductAction;
 	updateProduct: (product: Product) => UpdateProductAction;
+	deleteProduct: (productId: string) => DeleteProductAction;
+	deleteProductFromServer: (productId: string) => DeleteProductFromServerAction;
 	setProduct: (product: Product) => SetProductAction;
 	loadProduct: () => Action<TypesNames.LOAD_PRODUCT>;
 }
@@ -41,6 +45,12 @@ export interface CreateProductAction extends Action<TypesNames.CREATE_PRODUCT> {
 }
 export interface UpdateProductAction extends Action<TypesNames.UPDATE_PRODUCT> {
 	product: Product;
+}
+export interface DeleteProductAction extends Action<TypesNames.DELETE_PRODUCT> {
+	productId: string;
+}
+export interface DeleteProductFromServerAction extends Action<TypesNames.DELETE_PRODUCT_FROM_SERVER> {
+	productId: string;
 }
 export interface SetProductAction extends Action<TypesNames.SET_PRODUCT> {
 	product: Product;
@@ -60,4 +70,5 @@ export class Product {
 export interface ProductFilter {
 	inStockOnly: boolean;
 	filterText: string;
+	filterById: string;
 }
